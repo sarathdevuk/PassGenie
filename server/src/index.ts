@@ -4,6 +4,7 @@ import cors from 'cors'
 import path from 'path';
 import morgan from 'morgan'
 import userRouter from './routes/userRoute';
+import dbconnection from './config/database';
 
 dotenv.config();
 
@@ -26,7 +27,11 @@ app.use(
   })
 )
 
+// User Router middleware setup 
 app.use("/", userRouter) 
+
+// connecting to database 
+dbconnection();
 
 
 app.listen(port, () => {
