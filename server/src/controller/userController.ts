@@ -2,8 +2,11 @@ import asyncHandler from "express-async-handler"
 import UserModel from "../models/userModel";
 import bcrypt from 'bcrypt'
 import AppError from "../utils/errors";
+import { ResponseType } from '../interface/interface'
+
 
 const jwt = require("../utils/jwt")
+const {sendVerificationCode } = require("../utils/sendOtp")
 
 
 
@@ -48,7 +51,6 @@ export const doLogin = asyncHandler(async(req , res) => {
   // verifying the password 
   const match = await bcrypt.compare(password, userExist.password)
   if(!match) throw new AppError(400 , "Invalid email or password ");
-  console.log("match" , match);
   
   const token = jwt.createToken(userExist._id) ;
 
@@ -58,4 +60,31 @@ export const doLogin = asyncHandler(async(req , res) => {
   });
 
 })
+
+export const sendOtp = asyncHandler(async(req , res) => {
+  const {email} :{email:string} = req.body
+
+  if(!email) throw new AppError(400 , "All fields are mandatory") 
+  let user  = await UserModel.findOne({email})
+
+  if(user) {
+    sendVerificationCode(email)
+      .then(async (response: ResponseType ) => {
+        let setOtp = await UserModel.updateOne(
+          { email: email },
+          { $set: { otp: response.otp } }
+        );
+        res.json({ status : true , email , message :"OTP Send Successfully"})
+      }).catch((error : object) => {
+        res.status(404).json({ status : false, message :"OTP no send"})
+      });
+  }else{
+    res.json({ status : false, message :"User not found"})
+  }
+})
+
+
+
+
+
 

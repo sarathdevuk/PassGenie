@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doLogin = exports.register = void 0;
+exports.sendOtp = exports.doLogin = exports.register = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const errors_1 = __importDefault(require("../utils/errors"));
 const jwt = require("../utils/jwt");
+const { sendVerificationCode } = require("../utils/sendOtp");
 exports.register = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password, name } = req.body;
     // checking the user exist 
@@ -53,11 +54,28 @@ exports.doLogin = (0, express_async_handler_1.default)((req, res) => __awaiter(v
     const match = yield bcrypt_1.default.compare(password, userExist.password);
     if (!match)
         throw new errors_1.default(400, "Invalid email or password ");
-    console.log("match", match);
     const token = jwt.createToken(userExist._id);
     res.json({
         success: true,
         token,
     });
+}));
+exports.sendOtp = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    if (!email)
+        throw new errors_1.default(400, "All fields are mandatory");
+    let user = yield userModel_1.default.findOne({ email });
+    if (user) {
+        sendVerificationCode(email)
+            .then((response) => __awaiter(void 0, void 0, void 0, function* () {
+            let setOtp = yield userModel_1.default.updateOne({ email: email }, { $set: { otp: response.otp } });
+            res.json({ status: true, email, message: "OTP Send Successfully" });
+        })).catch((error) => {
+            res.status(404).json({ status: false, message: "OTP no send" });
+        });
+    }
+    else {
+        res.json({ status: false, message: "User not found" });
+    }
 }));
 //# sourceMappingURL=userController.js.map
