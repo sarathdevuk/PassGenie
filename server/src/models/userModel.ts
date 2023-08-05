@@ -3,10 +3,6 @@ import {IUser} from '../interface/interface';
 
 
 const userShema = new mongoose.Schema<IUser>({
-  name: {
-    type : String ,
-    required :true 
-  },
   email: {
     type:String,
     required : [true , "Name cannot be empty"]
@@ -16,7 +12,7 @@ const userShema = new mongoose.Schema<IUser>({
     required : [true , "password is Required"],
   },
   otp:{
-    type:Number,
+    type:String,
   }
  
 })
