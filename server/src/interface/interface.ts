@@ -12,6 +12,13 @@ export interface IUser {
   name:string,
   email:string,
   password: string ,
+  otp:number
+}
+
+export interface ResponseType {
+  otp: Number; 
+  status : boolean;
   
 }
+
 
