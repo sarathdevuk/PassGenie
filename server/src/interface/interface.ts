@@ -9,14 +9,13 @@ export interface IRequest extends Request {
 
 export interface IUser {
   _id:ObjectId;
-  name:string,
   email:string,
   password: string ,
-  otp:number
+  otp:string
 }
 
 export interface ResponseType {
-  otp: Number; 
+  otp: string; 
   status : boolean;
   
 }
