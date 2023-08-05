@@ -17,11 +17,10 @@ app.use(express.urlencoded({extended:true}))
 app.use(express.static(path.resolve() + "/public" ))
 
 
-
 // CORSE
 app.use(
   cors({
-    origin:[process.env.ORIGIN_URL as string ],
+    origin:[process.env.CLIENT_URL as string ],
     methods : ["GET" , "POST" , "PUT" , "PATCH" , "DELETE"] ,
     credentials : true,
   })

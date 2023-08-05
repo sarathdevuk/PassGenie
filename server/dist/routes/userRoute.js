@@ -8,5 +8,9 @@ router.get("/", (req, res) => {
 });
 router.post("/register", userController_1.register);
 router.post("/login", userController_1.doLogin);
+// forgot psss
+router.post("/send-otp", userController_1.sendOtp);
+router.post("/verify-otp", userController_1.verifyOtp);
+router.post('/update-password', userController_1.updatePassword);
 exports.default = router;
 //# sourceMappingURL=userRoute.js.map
