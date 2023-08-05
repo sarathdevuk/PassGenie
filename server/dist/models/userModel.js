@@ -17,6 +17,9 @@ const userShema = new mongoose_1.default.Schema({
         type: String,
         required: [true, "password is Required"],
     },
+    otp: {
+        type: Number,
+    }
 });
 const UserModel = mongoose_1.default.model("User", userShema);
 exports.default = UserModel;
