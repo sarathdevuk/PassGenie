@@ -1,8 +1,12 @@
 
 import './App.css'
-import LoginPage from './pages/LoginPage'
 import { BrowserRouter , Route , Routes} from "react-router-dom"
-// import { Toaster } from 'react-hot-toast'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
+
+
+import { Toaster } from 'react-hot-toast'
+import HomePage from './pages/HomePage'
 
 
 
@@ -13,8 +17,11 @@ function App() {
     <BrowserRouter>
       <Routes >
         <Route path='/' element={<LoginPage/>} />
+        <Route path='/signup' element={<SignupPage/>} />
+        <Route path='/home' element={<HomePage/>} />
       </Routes>
     </BrowserRouter>
+    <Toaster/>
 
     </>
   )
