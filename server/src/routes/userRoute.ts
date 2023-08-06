@@ -1,6 +1,6 @@
 import _default from "concurrently";
 import { Router } from "express" ;
-import { doLogin, register } from "../controller/userController";
+import { doLogin, register, sendOtp, updatePassword, verifyOtp } from "../controller/userController";
 
 const router = Router() ;
 
@@ -10,6 +10,11 @@ router.get("/" , (req, res) => {
 
 router.post("/register",register)
 router.post("/login",doLogin)
+
+// forgot psss
+router.post("/send-otp" , sendOtp) ;
+router.post("/verify-otp" , verifyOtp) ;
+router.post('/update-password' , updatePassword);
 
 
 export default router
