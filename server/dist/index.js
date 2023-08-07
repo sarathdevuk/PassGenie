@@ -10,6 +10,7 @@ const path_1 = __importDefault(require("path"));
 const morgan_1 = __importDefault(require("morgan"));
 const userRoute_1 = __importDefault(require("./routes/userRoute"));
 const database_1 = __importDefault(require("./config/database"));
+const errorHandler_1 = __importDefault(require("./middleware/errorHandler"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 5050;
@@ -25,6 +26,8 @@ app.use((0, cors_1.default)({
 }));
 // User Router middleware setup 
 app.use("/", userRoute_1.default);
+// global error handler
+app.use(errorHandler_1.default);
 // connecting to database 
 (0, database_1.default)();
 app.listen(port, () => {

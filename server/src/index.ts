@@ -5,6 +5,7 @@ import path from 'path';
 import morgan from 'morgan'
 import userRouter from './routes/userRoute';
 import dbconnection from './config/database';
+import errorHandler from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -28,6 +29,9 @@ app.use(
 
 // User Router middleware setup 
 app.use("/", userRouter) 
+
+// global error handler
+app.use(errorHandler)
 
 // connecting to database 
 dbconnection();
