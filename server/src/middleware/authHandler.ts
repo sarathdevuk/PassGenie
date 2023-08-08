@@ -5,7 +5,7 @@ const authChecker = async (req , res , next) => {
   try {
     const { Authorization } = req.headers ; 
     if(!Authorization) {
-      throw new AppError(401, "Authorization token required") ;
+      throw new AppError(401, "Authorization token required");
     }
     const token = Authorization.split(" ")[1];
     jwt.verify(token , process.env.JWT_SECRET_KEY , (err , decodedToken) => {
