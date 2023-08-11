@@ -1,15 +1,155 @@
-import { useState } from "react";
+import  { useEffect, useState } from "react";
+import generatePassword from "../helper/generatePassword";
+import { toast } from "react-hot-toast";
+import copyToClipboard from "../helper/copyToClipboard";
+import { addPassword, deletePassword, getPasswords } from "../services/userApi";
+
+import Swal from 'sweetalert2'
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert , { AlertProps } from "@mui/material/Alert";
+
+
+interface PasswordItem {
+  _id:string ;
+  appName: string;
+  userName: string;
+  password : string
+
+  // ... other properties of your password item
+}
+
 
 function Banner() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState('');
-  const [rangeValue, setRangeValue] = useState(50);
+  
+  const [password, setPassword] = useState("");
+  const [appName, setAppName] = useState('')
+  const [userName, setUserName] = useState('')
+  const [refresh, setRefresh] = useState(true);
+  const [open, setOpen] = useState(false)
+  const [list, setList] = useState<PasswordItem[]>([]);
+  const [err , setErr] = useState('')
+  const [option, setOption] = useState({
+    upperCase: true,
+    numbers: true,
+    symbols: false
+  })
+
+  const [length, setLength] = useState(8)
+
 
 
   const handleModalToggle = (content: string) => {
     setIsModalOpen(!isModalOpen);
     setModalContent(content);
   };
+
+  useEffect(() => {
+    getData()
+  },[refresh]) 
+
+  async function getData() {
+    const {data} = await getPasswords() ;
+
+    if(data.success) {
+      setList(data.passwords)
+    }
+
+  }
+
+  useEffect(() => {
+    try {
+      let newPassword = generatePassword(option, length)
+      setPassword(newPassword);
+      
+
+    } catch (error) {
+      console.log(error);
+      toast.error("something went wrong", { position: "top-center" })
+    }
+  }, [option, length, refresh])
+
+  const handleLengthChange = ((e: any) => {
+    setLength(e.target.value)
+  })
+
+  const savePassword = async () => {
+try {
+  const { data } = await addPassword( appName , userName , password ) 
+
+  if( data.success ) {
+    Swal.fire(
+      {
+          title: 'Success',
+          text: "Password added successfully.",
+          icon: 'success',
+          confirmButtonColor: '#DC4C64'
+      }
+  )
+  setRefresh(refresh => !refresh)
+  setOpen(false)
+  }else{
+  setErr(data.message)
+
+  }
+  
+} catch (err:any) {
+  console.log(err);
+  toast.error(err.error.message)
+  
+}  } 
+
+async function handledDeletePassword(id : string) {
+  Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#DC4C64',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
+      reverseButtons: true
+  }).then(async (result) => {
+      if (result.isConfirmed) { 
+
+         deletePassword(id).then((response) => {
+             if (response.data.success) {
+              Swal.fire(
+                  {
+                      title: 'Success',
+                      text: "Password deleted successfull.",
+                      icon: 'success',
+                      confirmButtonColor: '#DC4C64'
+                  }
+              )
+          } else {
+              Swal.fire(
+                  {
+                      title: 'Failed!',
+                      text: "Password deletion failed",
+                      icon: 'error',
+                      confirmButtonColor: '#DC4C64'
+                  }
+              )
+          }
+          setRefresh(!refresh)
+         })
+         .catch ((err) => {
+          console.log(err);
+          
+          toast.error( err.error.message, {position : "top-center"})
+         })
+         
+
+      }
+  })
+
+}
+
+const copyMessage= () => {
+  toast.success("Password copied" , {position : "bottom-center"})
+}
 
 
   return (
@@ -74,16 +214,23 @@ function Banner() {
               {/* Rest of the modal content */}
               <input
                 type="text"
-                // value={password}
-                // onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:bg-gray-800 dark:text-white"
               />
+              <button
+                className="w-full  text-white border border-yellow-400 bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded text-sm px-5 py-1.5 text-center mr-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900"     
+                onClick={() => {
+                  copyToClipboard(password)
+                  copyMessage()
+                }}
+                >Copy password </button>
               {/* ... Continue with other form fields and options */}
               <div className="mt-4">
                 <div className="flex justify-between flex-row items-center">
                   <span>Length</span>
                   <div className="badge badge-primary p-3 rounded-5">
-                    {rangeValue}
+                    {length}
                   </div>
                 </div>
               </div>
@@ -93,9 +240,23 @@ function Banner() {
                 min={5}
                 max={64}
                 step={1}
-                value={rangeValue}
-                onChange={(e) => setRangeValue(parseInt(e.target.value))}
+                value={length}
+                onChange={handleLengthChange}
                 className="w-full h-2 mb-6 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+              />
+              <input
+                type="text"
+                placeholder="App Name"
+                value={appName}
+                onChange={(e) => setAppName(e.target.value)}
+                className="w-full mb-4 px-4 py-2 rounded-md border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:bg-gray-800 dark:text-white"
+              />
+              <input
+                type="text"
+                placeholder="User Name"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full mb-5 px-4 py-2 rounded-md border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:bg-gray-800 dark:text-white"
               />
               {/* ... Continue with the other options */}
               <div className="mt-3">
@@ -107,7 +268,9 @@ function Banner() {
                     Include Numbers
                   </label>
                   <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                    <input type="checkbox" value="" className="sr-only peer" />
+                    <input type="checkbox" value="" className="sr-only peer"
+                      checked={option.numbers}
+                      onChange={(e) => setOption({ ...option, numbers: e.target.checked })} />
                     <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
@@ -121,7 +284,9 @@ function Banner() {
                     Include Uppercase letters
                   </label>
                   <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                    <input type="checkbox" value="" className="sr-only peer" />
+                    <input type="checkbox" value="" className="sr-only peer"
+                      checked={option.upperCase}
+                      onChange={(e) => setOption({ ...option, upperCase: e.target.checked })} />
                     <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
@@ -136,7 +301,9 @@ function Banner() {
 
                   </label>
                   <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                    <input type="checkbox" value="" className="sr-only peer" />
+                    <input type="checkbox" value="" className="sr-only peer"
+                      checked={option.symbols}
+                      onChange={(e) => setOption({ ...option, symbols: e.target.checked })} />
                     <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
@@ -148,18 +315,18 @@ function Banner() {
                     type="button"
                     className="w-full text-yellow-400  border border-yellow-400  focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded text-sm  py-2.5 text-center  mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900"
 
-                  // onClick={() => setPageReload(!pageReload)}
+                    onClick={() => setRefresh(!refresh)}
                   >
                     Generate new
                   </button>
                 </div>
               </div>
               {/* ... Continue with the error display */}
-              {/* {err && (
+              {err && (
               <div className="mt-3 text-red-500">
                 <p>{err}</p>
               </div>
-            )} */}
+            )}
 
               <div className="flex justify-end mt-6">
                 <button
@@ -169,10 +336,9 @@ function Banner() {
                   Close
                 </button>
                 <button
-                  // className="bg-red-500 text-white px-4 py-2.5 text-sm rounded-lg disabled:opacity-50 focus:outline-none"
                   className="ml-2 text-white border border-yellow-400 bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900"
-                // onClick={addPassword}
-                // disabled={appName === "" || userName === "" || password === ""}
+                onClick={savePassword}
+                disabled={appName === "" || userName === "" || password === ""}
                 >
                   Save
                 </button>
@@ -193,7 +359,6 @@ function Banner() {
                   type="button"
                   className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
                   onClick={() => handleModalToggle('')}
-
                 >
                   <svg
                     className="w-3 h-3"
@@ -219,8 +384,8 @@ function Banner() {
                   <div className="ps-2 pe-2 mt-3">
                     <input
                       readOnly
-                      // value={password}
-                      // onChange={(e) => setPassword(e.target.value)}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       id="form1"
                       type="text"
                       // size="lg"
@@ -232,7 +397,7 @@ function Banner() {
                     <div className="flex justify-between flex-row items-center">
                       <span>Length</span>
                       <div className="badge badge-primary p-3 rounded-5">
-                        {rangeValue}
+                        {length}
                       </div>
                     </div>
 
@@ -242,8 +407,8 @@ function Banner() {
                       min={5}
                       max={64}
                       step={1}
-                      value={rangeValue}
-                      onChange={(e) => setRangeValue(parseInt(e.target.value))}
+                      value={length}
+                      onChange={handleLengthChange}
                       className="w-full h-2 mb-6 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                     />
 
@@ -257,7 +422,10 @@ function Banner() {
                         Include Numbers
                       </label>
                       <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" />
+                        <input type="checkbox" value="" className="sr-only peer"
+                          checked={option.numbers}
+                          onChange={(e) => setOption({ ...option, numbers: e.target.checked })} />
+
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
@@ -270,17 +438,11 @@ function Banner() {
                       >
                         Include Uppercase letters
                       </label>
-                      {/* <input
-                        type="checkbox"
-                        id="capCheck"
-                        // checked={option.upperCase}
-                        // onChange={(e) =>
-                        //   setOption({ ...option, upperCase: e.target.checked })
-                        // }
-                        className="w-5 h-5 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-                      /> */}
+
                       <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" />
+                        <input type="checkbox" value="" className="sr-only peer"
+                          checked={option.upperCase}
+                          onChange={(e) => setOption({ ...option, upperCase: e.target.checked })} />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
@@ -294,14 +456,16 @@ function Banner() {
                         Include Symbols
                       </label>
                       <label className="relative inline-flex items-center mb-5 cursor-pointer">
-                        <input type="checkbox" value="" className="sr-only peer" />
+                        <input type="checkbox" value="" className="sr-only peer"
+                          checked={option.symbols}
+                          onChange={(e) => setOption({ ...option, symbols: e.target.checked })} />
                         <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       </label>
                     </div>
                   </div>
                   <div className="mt-3 ">
                     <button
-                      // onClick={() => setRefresh(!refresh)}
+                      onClick={() => setRefresh(!refresh)}
                       type="button"
                       className="w-full text-yellow-400  border border-yellow-400  focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded text-sm  py-2.5 text-center  mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900"
                     >
@@ -317,10 +481,10 @@ function Banner() {
                     Close
                   </button>
                   <button
-                    // onClick={() => {
-                    //   copyToClipboard(password);
-                    //   setCopyOpen(true);
-                    // }}
+                    onClick={() => {
+                      copyToClipboard(password)
+                      copyMessage()
+                    }}
                     className="ml-2 text-white border border-yellow-400 bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:border-yellow-300 dark:text-yellow-300 dark:hover:text-white dark:hover:bg-yellow-400 dark:focus:ring-yellow-900"
                   >
                     Copy to Clipboard
@@ -342,12 +506,11 @@ function Banner() {
       </div>
 
       <div className="mt-5">
-        {/* <h5 className='text-xl font-bold'>Saved Passwords</h5> */}
         <div className="mt-3">
-          {/* {list[0] &&
-        list.map((item, index) => ( */}
+          {list?.[0] &&
+        list.map((item, index) => (
           <div
-            //  key={index}
+             key={index}
             className="mb-4"
           >
             <div className="flex justify-between items-center">
@@ -359,14 +522,14 @@ function Banner() {
                   alt="Profile"
                 />
                 <div className="ms-3">
-                  <p className="font-bold mb-1">Instagram</p>
-                  <p className="text-gray-500 mb-0">Sarathdev </p>
+                  <p className="font-bold mb-1">{item.appName}</p>
+                  <p className="text-gray-500 mb-0">{item.userName} </p>
                 </div>
               </div>
               <div className=" p-2">
                 <button
                   className="text-blue-600 hover:text-blue-700 focus:outline-none mr-4 w-full"
-                // onClick={() => deletePassword(item._id)}
+                onClick={() => handledDeletePassword(item._id)}
                 >
                   Delete
                   <svg
@@ -386,10 +549,10 @@ function Banner() {
                 </button>
                 <button
                   className="text-red-500 hover:text-red-600 focus:outline-none mr-4"
-                // onClick={() => {
-                //   copyToClipboard(item.password);
-                //   setOpen(true);
-                // }}
+                onClick={() => {
+                  copyToClipboard(item.password);
+                  copyMessage()
+                }}
                 >
                   Copy password
                   <svg
@@ -409,9 +572,10 @@ function Banner() {
                 </button>
               </div>
             </div>
-         
+                  
+
           </div>
-          {/* ))} */}
+           ))} 
         </div>
       </div>
     </div>
@@ -419,3 +583,4 @@ function Banner() {
 }
 
 export default Banner;
+
