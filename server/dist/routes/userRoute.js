@@ -9,7 +9,7 @@ const userController_1 = require("../controller/userController");
 const passwordController_1 = require("../controller/passwordController");
 const router = (0, express_1.Router)();
 router.get("/", (req, res) => {
-    res.send('Hello useroruter is working');
+    res.send('Hello updated  is working');
 });
 router.get("/auth", userController_1.checkLogin);
 router.post("/register", userController_1.register);

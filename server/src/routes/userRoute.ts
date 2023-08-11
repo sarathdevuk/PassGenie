@@ -7,7 +7,7 @@ import { addPassword, deletePassword, getPassword } from "../controller/password
 const router = Router() ;
 
 router.get("/" , (req, res) => {
-  res.send('Hello useroruter is working')
+  res.send('Hello updated  is working')
 } )
 
 router.get("/auth", checkLogin)

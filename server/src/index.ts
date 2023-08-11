@@ -21,7 +21,7 @@ app.use(express.static(path.resolve() + "/public" ))
 // CORSE
 app.use(
   cors({
-    origin:[process.env.CLIENT_URL as string , 'https://passgiene.netlify.app' ],
+    origin:[process.env.CLIENT_URL as string , 'https://passgiene.netlify.app' , "https://passgiene.netlify.app" ],
     methods : ["GET" , "POST" , "PUT" , "PATCH" , "DELETE"] ,
     credentials : true,
   })
