@@ -42,13 +42,16 @@ export const addPassword = asyncHandler(async (req ,res  ) => {
 export const getPassword = asyncHandler(async(req ,res) => {
  try {
   let passwords = await passwordModel.find({ userId : req.userId})
+  
   let decryptedPasswords = passwords.map((item) => {
-    return {appName : item.appName , userName : item.userName , _id:item._id , password : decrypt(item.password)}
+    return {appName : item.appName , userName : item.userName , _id:item._id , password: decrypt({ iv: item.password.iv, encryptedData: item.password.encryptedData })}
   })
 
-  return res.status(200).json({ success : true , message : "Success" , decryptedPasswords  })
+  
+  return res.status(200).json({ success : true , message : "Success" , passwords :  decryptedPasswords  })
   
  } catch (error) {
+  
     throw new AppError(500 , "Something went wrong")
  }
 
@@ -58,11 +61,13 @@ export const getPassword = asyncHandler(async(req ,res) => {
 
 export const deletePassword = asyncHandler(async (req ,res )=> {
     try {
+      
       if (!req.params.id) throw new AppError(400, "all Fields Are mandatory");
      const deletePass =  await passwordModel.deleteOne({ userId : req.userId , _id: req.params.id}) 
+    
       return res.json({ success :true, message : "Successfully Deleted"})
+
     } catch (error) {
-      console.log(error);
       throw new AppError( 500 , "Something went wrong ")
     }
 })
