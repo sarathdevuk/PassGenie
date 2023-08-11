@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import AuthForm from '../componants/AuthForm'
-import { authUser, login } from '../services/userApi'
+import { login } from '../services/userApi'
 import { toast } from 'react-hot-toast';
 import { useEffect } from 'react';
 
