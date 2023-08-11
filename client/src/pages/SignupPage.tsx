@@ -2,20 +2,25 @@ import { useNavigate } from 'react-router-dom';
 import Form from '../componants/AuthForm'
 import { signup } from '../services/userApi';
 import toast  from 'react-hot-toast'
+import { useState } from 'react';
 
 
 function SignupPage() {
 
+  const [loading , setLoading] = useState(false)
+
   const navigate = useNavigate() ;
 
   const handleSignup = ( values : object) => {
-    console.log(values);
+    setLoading(!loading)
     signup(values).then(() => {
         toast.success("Account created" , {
           position: "bottom-center"
         })
-      navigate('/')
-    }).catch((err) => {
+      navigate('/') 
+      setLoading(!loading)
+    }).catch((err) => { 
+      setLoading(false)
       toast.error(err.error.message , {
         position: "top-center", 
       
@@ -34,6 +39,7 @@ function SignupPage() {
     redirectBtnName={"Login"}
     handleFunction={handleSignup}
     formType={"signup"}
+    loading = {loading}
     >
     </Form>
 

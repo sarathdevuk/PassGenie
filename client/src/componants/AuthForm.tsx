@@ -10,11 +10,12 @@ type FormProps = {
   redirectBtnName: string,
   handleFunction: (values:object) => void,
   formType: string,
+  loading : boolean ,
   children?: React.ReactNode, 
 
 }
 
-function AuthForm({ header, redirect, buttonName, redirectBtnName, handleFunction, formType }: FormProps) {
+function AuthForm({ header, redirect, buttonName, redirectBtnName, handleFunction, formType , loading }: FormProps) {
 
   //Yup form validation
   const validate = Yup.object({
@@ -63,22 +64,22 @@ function AuthForm({ header, redirect, buttonName, redirectBtnName, handleFunctio
                         </div>
 
 
-                        <button type="submit" className="w-full  bg-primary-600 bg-blue-600  font-medium rounded-lg text-sm px-5 py-2.5 text-center text-white ">{buttonName}</button>
-                        {formType === 'login' && (
+                        <button type="submit" className="w-full  bg-primary-600 bg-blue-600  font-medium rounded-lg text-sm px-5 py-2.5 text-center text-white py-auto flex justify-center  ">{buttonName} { loading &&  <span className="ml-2 loading loading-bars loading-md"></span>} </button>
+                        {/* {formType === 'login' && (
                             <Link to={'/forgot-password'} >
                                 <div className="flex items-center mt-4 justify-center">
                                     <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500 ">Forgot password?</a>
                                 </div>
                             </Link>
-                        )}
+                        )} */}
                         <Link to={redirect}>
                             {formType === 'login' ?
                                 <p className="text-sm font-light text-gray-800 mt-4 text-center dark:text-gray-400">
-                                    Don’t have an account yet? <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">{redirectBtnName}</span>
+                                    Don’t have an account yet? <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">{redirectBtnName} </span>
                                 </p>
                                 :
                                 <p className="text-sm font-light text-gray-800  text-center mt-4 dark:text-gray-400">
-                                    Already On Todo ?  <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">{redirectBtnName}</span>
+                                    Already On PassGiene ?  <span className="font-medium text-primary-600 hover:underline dark:text-primary-500">{redirectBtnName}</span>
                                 </p>
                             }
                         </Link>

@@ -2,22 +2,26 @@ import { useNavigate } from 'react-router-dom'
 import AuthForm from '../componants/AuthForm'
 import { login } from '../services/userApi'
 import { toast } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function LoginPage() {
+
+  const [loading , setLoading] = useState(false)
+
   const navigate = useNavigate() ;
 
   const handleLogin = (values : object) => { 
     console.log(values)
+    setLoading(!loading)
     login(values).then((response)=> {
       console.log(response.data , "success");
-      
+      setLoading(!loading)
       localStorage.setItem('jwtToken' , response.data?.token)
       navigate('/home')
     })
     .catch((err) => {
-      console.log(err);
-      
+      setLoading(false)
+
       toast.error(err.error.message , {
         position: "top-center",
         // id:"error"
@@ -40,6 +44,7 @@ function LoginPage() {
     redirectBtnName={"Sign up"}
     handleFunction={handleLogin}
     formType={'login'}
+    loading = {loading}
     >
     </AuthForm>
 
