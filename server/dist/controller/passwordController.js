@@ -26,14 +26,15 @@ exports.addPassword = (0, express_async_handler_1.default)((req, res) => __await
     if (passwordExist) {
         throw new errors_1.default(404, "Password already exist ");
     }
-    console.log(password, " password");
     const encryptedPassword = (0, encryptDecrypt_1.encrypt)(password);
-    console.log(encryptedPassword, " encryptDecrypt");
     const passwordPresent = yield passwordModel_1.default.findOne({ 'password.encryptedData': encryptedPassword.encryptedData });
     if (passwordPresent) {
         throw new errors_1.default(404, "Not a unique password");
     }
-    const newPassword = yield passwordModel_1.default.create({ appName, userName, userId: req.userId, password: encryptedPassword });
+    const newPassword = yield passwordModel_1.default.create({ appName, userName, userId: req.userId, password: {
+            iv: encryptedPassword.iv,
+            encryptedData: encryptedPassword.encryptedData,
+        }, });
     if (!newPassword) {
         throw new errors_1.default(400, "Password Creation Failed");
     }
@@ -42,8 +43,13 @@ exports.addPassword = (0, express_async_handler_1.default)((req, res) => __await
 exports.getPassword = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let passwords = yield passwordModel_1.default.find({ userId: req.userId });
-        let decryptedPasswords = passwords.map((item) => {
-            return { appName: item.appName, userName: item.userName, _id: item._id, password: (0, encryptDecrypt_1.decrypt)({ iv: item.password.iv, encryptedData: item.password.encryptedData }) };
+        const decryptedPasswords = passwords.map((item) => {
+            return {
+                appName: item.appName,
+                userName: item.userName,
+                _id: item._id,
+                password: (0, encryptDecrypt_1.decrypt)({ iv: item.password.iv, encryptedData: item.password.encryptedData }),
+            };
         });
         return res.status(200).json({ success: true, message: "Success", passwords: decryptedPasswords });
     }

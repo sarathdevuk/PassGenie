@@ -1,7 +1,7 @@
 import _default from "concurrently";
 import { Router } from "express" ;
 import authChecker from '../middleware/authHandler'
-import { doLogin, register, sendOtp, updatePassword, verifyOtp } from "../controller/userController";
+import { checkLogin, doLogin, register, sendOtp, updatePassword, verifyOtp } from "../controller/userController";
 import { addPassword, deletePassword, getPassword } from "../controller/passwordController";
 
 const router = Router() ;
@@ -9,6 +9,8 @@ const router = Router() ;
 router.get("/" , (req, res) => {
   res.send('Hello useroruter is working')
 } )
+
+router.get("/auth", checkLogin)
 
 router.post("/register",register)
 router.post("/login",doLogin)

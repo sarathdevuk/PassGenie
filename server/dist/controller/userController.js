@@ -12,13 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePassword = exports.verifyOtp = exports.sendOtp = exports.doLogin = exports.register = void 0;
+exports.updatePassword = exports.verifyOtp = exports.sendOtp = exports.doLogin = exports.register = exports.checkLogin = void 0;
 const express_async_handler_1 = __importDefault(require("express-async-handler"));
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const errors_1 = __importDefault(require("../utils/errors"));
-const jwt = require("../utils/jwt");
+const jwt = require("jsonwebtoken");
+const { createToken } = require("../utils/jwt");
 const { sendVerificationCode } = require("../utils/sendOtp");
+exports.checkLogin = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { authorization } = req.headers;
+        if (!authorization) {
+            return res.json({ success: false });
+        }
+        // console.log("sucess  login" );
+        const token = authorization.split(" ")[1];
+        jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decodedToken) => {
+            if (err) {
+                res.json({ error: "Invalid Authorization token" });
+            }
+            req.userId = decodedToken.id;
+            res.json({ success: true });
+        });
+    }
+    catch (error) {
+        console.log(error);
+        throw new errors_1.default(500, "Internal server Error ");
+    }
+}));
 exports.register = (0, express_async_handler_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     // checking the user exist 
@@ -54,7 +76,7 @@ exports.doLogin = (0, express_async_handler_1.default)((req, res) => __awaiter(v
     const match = yield bcrypt_1.default.compare(password, userExist.password);
     if (!match)
         throw new errors_1.default(400, "Invalid email or password ");
-    const token = jwt.createToken(userExist._id);
+    const token = createToken(userExist._id);
     res.json({
         success: true,
         token,

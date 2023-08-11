@@ -6,7 +6,6 @@ import {encrypt , decrypt } from "../utils/encryptDecrypt"
 
 export const addPassword = asyncHandler(async (req ,res  ) => {
 
-  
   const {appName , password , userName }: { appName : string , password : string ,userName : string } = req.body ;
 
   if(!appName || !password ||!userName)  {
@@ -17,10 +16,8 @@ export const addPassword = asyncHandler(async (req ,res  ) => {
   if(passwordExist) {
     throw new AppError(404 , "Password already exist ")
   }
-  console.log(password , " password");
 
   const encryptedPassword = encrypt(password );
-  console.log(encryptedPassword , " encryptDecrypt");
   
   const passwordPresent = await passwordModel.findOne({ 'password.encryptedData' : encryptedPassword.encryptedData }) 
 
@@ -28,7 +25,10 @@ export const addPassword = asyncHandler(async (req ,res  ) => {
     throw new AppError(404 , "Not a unique password") ;
   }
 
-  const newPassword = await passwordModel.create({appName , userName, userId : req.userId , password : encryptedPassword })
+  const newPassword = await passwordModel.create({appName , userName, userId : req.userId ,  password: {
+    iv: encryptedPassword.iv,
+    encryptedData: encryptedPassword.encryptedData,
+  }, })
 
   if(!newPassword) {
     throw new AppError( 400 , "Password Creation Failed")
@@ -41,17 +41,22 @@ export const addPassword = asyncHandler(async (req ,res  ) => {
 
 export const getPassword = asyncHandler(async(req ,res) => {
  try {
-  let passwords = await passwordModel.find({ userId : req.userId})
-  
-  let decryptedPasswords = passwords.map((item) => {
-    return {appName : item.appName , userName : item.userName , _id:item._id , password: decrypt({ iv: item.password.iv, encryptedData: item.password.encryptedData })}
-  })
+   
+   let passwords = await passwordModel.find({ userId : req.userId})
+
+  const decryptedPasswords = passwords.map((item) => {
+    return {
+      appName: item.appName,
+      userName: item.userName,
+      _id: item._id,
+      password: decrypt({ iv: item.password.iv, encryptedData: item.password.encryptedData }),
+    };
+  });
 
   
   return res.status(200).json({ success : true , message : "Success" , passwords :  decryptedPasswords  })
   
  } catch (error) {
-  
     throw new AppError(500 , "Something went wrong")
  }
 

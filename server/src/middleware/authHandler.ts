@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken") ;
-const AppError = require("../utils/errors") ;
+import AppError from "../utils/errors";
 
 const authChecker = async (req , res , next) => {
   try {

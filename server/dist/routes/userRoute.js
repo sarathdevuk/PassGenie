@@ -11,6 +11,7 @@ const router = (0, express_1.Router)();
 router.get("/", (req, res) => {
     res.send('Hello useroruter is working');
 });
+router.get("/auth", userController_1.checkLogin);
 router.post("/register", userController_1.register);
 router.post("/login", userController_1.doLogin);
 // forgot psss

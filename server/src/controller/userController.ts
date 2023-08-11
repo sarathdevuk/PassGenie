@@ -3,11 +3,41 @@ import UserModel from "../models/userModel";
 import bcrypt from 'bcrypt'
 import AppError from "../utils/errors";
 import { ResponseType } from '../interface/interface'
+const jwt = require("jsonwebtoken") ;
 
 
-const jwt = require("../utils/jwt")
+const { createToken } = require("../utils/jwt")
 const {sendVerificationCode } = require("../utils/sendOtp")
 
+
+export const checkLogin = asyncHandler(async (req, res) => {
+  try {
+    
+    const { authorization } = req.headers ;
+     
+    if(!authorization) {
+     return  res.json({success : false})
+    }
+    // console.log("sucess  login" );
+    const token = authorization.split(" ")[1];
+    jwt.verify(token , process.env.JWT_SECRET_KEY , (err , decodedToken) => {
+      if(err) {
+        res.json({ error : "Invalid Authorization token"})
+      }
+      req.userId = decodedToken.id ;
+      
+      
+      res.json( {success : true })
+
+
+    })
+
+  } catch (error) {
+    console.log(error);
+    
+   throw new AppError( 500 , "Internal server Error ")
+  }
+})
 
 
 export const register =  asyncHandler(async (req ,res) => {
@@ -52,7 +82,7 @@ export const doLogin = asyncHandler(async(req , res) => {
   const match = await bcrypt.compare(password, userExist.password)
   if(!match) throw new AppError(400 , "Invalid email or password ");
   
-  const token = jwt.createToken(userExist._id) ;
+  const token = createToken(userExist._id) ;
 
   res.json({
     success: true,
@@ -121,6 +151,8 @@ export const updatePassword = asyncHandler(async (req , res) => {
   
 
 })
+
+
 
 
 

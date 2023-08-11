@@ -10,8 +10,9 @@ const passwordSchema = new mongoose_1.default.Schema({
         ref: "User"
     },
     password: {
-        type: Object,
-        required: true,
+        iv: String,
+        encryptedData: String, // Store encrypted password
+        // required: true,
     },
     appName: {
         type: String,
@@ -19,8 +20,8 @@ const passwordSchema = new mongoose_1.default.Schema({
     },
     userName: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
 });
 const passwordModel = mongoose_1.default.model("Password", passwordSchema);
 exports.default = passwordModel;

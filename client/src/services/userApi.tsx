@@ -1,5 +1,10 @@
 import axiosInstance from "../axios/axios";
 
+// check the user logged in 
+export const authUser = () => {
+  return axiosInstance().get('/auth') 
+}
+
 // signup 
 export const signup = (values: object) => {
   return axiosInstance().post('/register' , {...values}) ;
