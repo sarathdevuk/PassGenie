@@ -24,6 +24,8 @@ const errorHandler = (
       },
     });
   } else {
+    console.log(err);
+    
     res
       .status(500)
       .json({ error: { success: false, message: "Something went wrong" } });
