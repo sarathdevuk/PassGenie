@@ -2,6 +2,8 @@ import React , {useEffect, useState}  from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FcLock } from "react-icons/fc";
 import { authUser } from '../services/userApi';
+import { toast } from 'react-hot-toast';
+
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -9,15 +11,15 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     authUser().then((response)=>{
-    console.log("+==================" , response);
-
+  
     if(!response.data.success){
       navigate('/')
     }
-
   }).catch((err)=>{
     console.log(err);
     
+    toast.error("something went Wrong" , {position : 'top-center'})
+     
   })
 
   }, [])
