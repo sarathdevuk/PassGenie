@@ -20,7 +20,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.static(path_1.default.resolve() + "/public"));
 // CORSE
 app.use((0, cors_1.default)({
-    origin: [process.env.CLIENT_URL],
+    origin: [process.env.CLIENT_URL, 'https://passgiene.netlify.app'],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
 }));
