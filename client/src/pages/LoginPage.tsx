@@ -17,8 +17,9 @@ function LoginPage() {
     .catch((err) => {
       console.log(err);
       
-      toast.error(err.error , {
+      toast.error(err.error.message , {
         position: "top-center",
+        // id:"error"
       })
     })
   }

@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,15 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const AppError = require("../utils/errors");
-const authChecker = (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+const authChecker = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { Authorization } = req.headers;
-        if (!Authorization) {
+        const { authorization } = req.headers;
+        if (!authorization) {
             throw new AppError(401, "Authorization token required");
         }
-        const token = Authorization.split(" ")[1];
+        const token = authorization.split(" ")[1];
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decodedToken) => {
             if (err) {
                 res.json({ error: "Invalid Authorization token" });
@@ -28,5 +30,5 @@ const authChecker = (req, res, next) => __awaiter(this, void 0, void 0, function
         next(error);
     }
 });
-module.exports = authChecker;
+exports.default = authChecker;
 //# sourceMappingURL=authHandler.js.map

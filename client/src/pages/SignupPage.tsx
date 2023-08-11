@@ -10,12 +10,16 @@ function SignupPage() {
 
   const handleSignup = ( values : object) => {
     console.log(values);
-    signup(values).then((response) => {
-      console.log(response);
+    signup(values).then(() => {
+        toast.success("Account created" , {
+          position: "bottom-center"
+        })
       navigate('/')
     }).catch((err) => {
       toast.error(err.error.message , {
-        position: "top-center",
+        position: "top-center", 
+      
+    
       })
     })
     
