@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import AuthForm from '../componants/AuthForm'
-import { login } from '../services/userApi'
+import { authUser, login } from '../services/userApi'
 import { toast } from 'react-hot-toast';
+import { useEffect } from 'react';
 
 function LoginPage() {
   const navigate = useNavigate() ;
@@ -23,6 +24,13 @@ function LoginPage() {
       })
     })
   }
+
+  useEffect(()=> {
+    const token = localStorage.getItem('jwtToken')
+    if(token) {
+      navigate('/home')
+    }
+  })
 
   return (
     <AuthForm 
