@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { ErrorMessage, Formik, Form, Field } from "formik"
-import * as Yup from 'Yup';
+import * as Yup from 'yup';
 import * as React from 'react';
 
 type FormProps = {
